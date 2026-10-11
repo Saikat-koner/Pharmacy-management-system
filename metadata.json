@@ -1,0 +1,6 @@
+{
+  "name": "Pharmacy Management System",
+  "description": "A comprehensive pharmacy management system featuring customer browsing, store location maps, customer email enquiries, inventory tracking, therapeutic categories, and POS billing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
