@@ -1,4 +1,4 @@
-import { Medicine, Supplier, PrescriptionOrder, PharmacyShop, CustomerEnquiry } from '../types/pharmacy';
+import { Medicine, Supplier, PrescriptionOrder, PharmacyShop, CustomerEnquiry, BillReceipt } from '../types/pharmacy';
 
 export const INITIAL_CATEGORIES: string[] = [
   'Analgesics & Pain Relief',
@@ -363,25 +363,69 @@ export const INITIAL_PRESCRIPTIONS: PrescriptionOrder[] = [
   }
 ];
 
-export const SAMPLE_RECENT_BILLS = [
+export const INITIAL_BILLS: BillReceipt[] = [
   {
-    billId: 'INV-2026-1001',
+    billId: 'INV-1001',
     customerName: 'Rohan Gupta',
-    customerPhone: '9845012345',
+    customerPhone: '+91 98450 12345',
+    doctorName: 'Dr. S. Nair',
     date: '2026-10-11',
     time: '09:45 AM',
-    itemsCount: 2,
-    grandTotal: 125.50,
-    paymentMode: 'UPI' as const
+    items: [
+      {
+        medicineId: 'MED-101',
+        medicineName: 'Dolo 650',
+        batchNo: 'DL-8849',
+        dosageForm: 'Tablet',
+        unitPrice: 2.15,
+        quantity: 10,
+        total: 21.50
+      },
+      {
+        medicineId: 'MED-103',
+        medicineName: 'Pan-D',
+        batchNo: 'PND-9012',
+        dosageForm: 'Capsule',
+        unitPrice: 14.20,
+        quantity: 5,
+        total: 71.00
+      }
+    ],
+    subtotal: 92.50,
+    discountPercent: 0,
+    discountAmount: 0,
+    taxPercent: 5,
+    taxAmount: 4.63,
+    grandTotal: 97.13,
+    paymentMode: 'UPI'
   },
   {
-    billId: 'INV-2026-1002',
+    billId: 'INV-1002',
     customerName: 'Priya Nambiar',
-    customerPhone: '9876541200',
+    customerPhone: '+91 98765 41200',
+    doctorName: 'Dr. P. K. Banerjee',
     date: '2026-10-11',
     time: '10:15 AM',
-    itemsCount: 3,
-    grandTotal: 442.00,
-    paymentMode: 'Cash' as const
+    items: [
+      {
+        medicineId: 'MED-102',
+        medicineName: 'Augmentin 625 Duo',
+        batchNo: 'AUG-4921',
+        dosageForm: 'Tablet',
+        unitPrice: 18.50,
+        quantity: 10,
+        total: 185.00
+      }
+    ],
+    subtotal: 185.00,
+    discountPercent: 0,
+    discountAmount: 0,
+    taxPercent: 5,
+    taxAmount: 9.25,
+    grandTotal: 194.25,
+    paymentMode: 'Cash'
   }
 ];
+
+export const SAMPLE_RECENT_BILLS = INITIAL_BILLS;
+

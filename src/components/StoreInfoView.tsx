@@ -5,240 +5,287 @@ import {
   Phone, 
   Mail, 
   Clock, 
-  Video, 
-  Volume2, 
-  ShieldCheck, 
+  Send, 
   CheckCircle2, 
-  ListOrdered, 
-  List, 
-  BookMarked,
-  Play,
-  Square,
-  Sparkles
+  ShieldCheck,
+  User,
+  MessageSquare
 } from 'lucide-react';
+import { PharmacyShop, CustomerEnquiry } from '../types/pharmacy';
 
-export const StoreInfoView: React.FC = () => {
-  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+interface StoreInfoViewProps {
+  shops: PharmacyShop[];
+  enquiries: CustomerEnquiry[];
+  onSubmitEnquiry: (enquiry: CustomerEnquiry) => void;
+}
 
-  // Web Speech API Pharmacist Audio Advisory (100% reliable in-browser audio playback)
-  const handlePlayVoiceAdvisory = () => {
-    if ('speechSynthesis' in window) {
-      if (isPlayingVoice) {
-        window.speechSynthesis.cancel();
-        setIsPlayingVoice(false);
-        return;
-      }
+export const StoreInfoView: React.FC<StoreInfoViewProps> = ({
+  shops,
+  enquiries,
+  onSubmitEnquiry,
+}) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [subject, setSubject] = useState('Medicine Availability Check');
+  const [message, setMessage] = useState('');
+  const [submittedTicket, setSubmittedTicket] = useState<string | null>(null);
 
-      window.speechSynthesis.cancel(); // Stop any ongoing speech
-      const message = new SpeechSynthesisUtterance(
-        "Welcome to PharmaCare Chemists and Druggists. This is an official clinical advisory from our chief registered pharmacist. Please ensure you always complete your prescribed antibiotic course, even if your symptoms improve early. Take prescribed tablets with clean water after meals, and keep biological medicines like insulin refrigerated between 2 to 8 degrees Celsius. Our 24 by 7 emergency pharmacy helpline is always available."
-      );
-      message.rate = 0.95;
-      message.pitch = 1.0;
-      message.onend = () => setIsPlayingVoice(false);
-      message.onerror = () => setIsPlayingVoice(false);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !message.trim()) return;
 
-      setIsPlayingVoice(true);
-      window.speechSynthesis.speak(message);
-    } else {
-      alert("Browser speech synthesizer is initializing.");
-    }
+    const ticketId = `ENQ-${Date.now().toString().slice(-4)}`;
+    const now = new Date();
+
+    const newEnquiry: CustomerEnquiry = {
+      id: ticketId,
+      customerName: name.trim(),
+      email: email.trim() || 'Not provided',
+      phone: phone.trim() || 'Not provided',
+      subject,
+      category: 'General',
+      message: message.trim(),
+      date: now.toISOString().split('T')[0],
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'New',
+    };
+
+    onSubmitEnquiry(newEnquiry);
+    setSubmittedTicket(ticketId);
+
+    // Reset Form
+    setName('');
+    setEmail('');
+    setPhone('');
+    setMessage('');
+
+    setTimeout(() => {
+      setSubmittedTicket(null);
+    }, 6000);
   };
 
   return (
     <div className="space-y-6">
-      {/* Store Header Banner */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900 font-heading flex items-center gap-2">
-            <Building className="w-5 h-5 text-emerald-600" />
-            PharmaCare Dispensary &amp; Patient Advisory Desk
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Registered chemist, clinical storage protocols, cold-chain guidelines, and community health resources.
-          </p>
-        </div>
-        <div className="flex items-center space-x-2 text-xs font-mono shrink-0">
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-semibold">
-            CDSCO Lic: DL-20B/44910
-          </span>
-        </div>
+      {/* Header */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading flex items-center gap-2">
+          <MapPin className="w-6 h-6 text-emerald-600" />
+          <span>Pharmacy Store Branches &amp; Contact Enquiries</span>
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-500">
+          Find our licensed pharmacy outlets or submit an enquiry to check medicine availability.
+        </p>
       </div>
 
-      {/* Multimedia Center: Video & Audio Guidelines */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Video: Storage Guidelines with semantic figure */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex items-center space-x-2 pb-2 border-b border-slate-100">
-            <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
-              <Video className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-sm font-heading">
-                Pharmaceutical Cold Chain &amp; Storage Advisory
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                Patient training on handling temperature-sensitive medicines (2°C - 8°C)
-              </p>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Store Branches (7 Cols) */}
+        <section aria-labelledby="branches-heading" className="lg:col-span-7 space-y-4">
+          <h3 id="branches-heading" className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading flex items-center gap-2">
+            <Building className="w-4 h-4 text-emerald-600" />
+            <span>Store Locations &amp; Dispensary Branches</span>
+          </h3>
 
-          <figure className="m-0 space-y-2">
-            <div className="rounded-xl overflow-hidden bg-slate-950 aspect-video flex items-center justify-center relative">
-              <video
-                controls
-                playsInline
-                preload="metadata"
-                className="w-full h-full object-cover"
-                poster="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80"
+          <div className="space-y-4">
+            {shops.map((shop) => (
+              <article 
+                key={shop.id} 
+                className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3 hover:border-emerald-200 transition-all"
               >
-                <source
-                  src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                  type="video/mp4"
-                />
-                <source
-                  src="https://www.w3schools.com/html/mov_bbb.mp4"
-                  type="video/mp4"
-                />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-            <figcaption className="text-xs text-slate-500 text-center font-serif italic">
-              Figure 1: Safe storage instructions for biological insulin, vaccines, and reconstituted antibiotics.
-            </figcaption>
-          </figure>
-        </div>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900 font-heading">
+                      {shop.name}
+                    </h4>
+                    <p className="text-xs font-mono text-emerald-700 font-medium">
+                      Branch Code: {shop.branchCode}
+                    </p>
+                  </div>
 
-        {/* Audio: Chief Pharmacist Consultation Advisory */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2 pb-2 border-b border-slate-100">
-              <div className="p-2 bg-teal-50 text-teal-700 rounded-lg">
-                <Volume2 className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm font-heading">
-                  Chief Pharmacist Consultation Broadcast
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Critical advisory on completing antibiotic courses and dosage schedules
+                  {shop.is24x7 ? (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      24x7 Emergency Care
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                      Standard Hours
+                    </span>
+                  )}
+                </div>
+
+                <div className="text-xs text-slate-600 space-y-1.5 pt-1 border-t border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+                    <span>{shop.address}, {shop.city}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+                    <span>Operating Hours: <strong className="text-slate-800">{shop.timings}</strong></span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-slate-400 shrink-0" />
+                    <span>Phone: <strong className="text-slate-800">{shop.phone}</strong></span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Pharmacist-in-Charge: <strong className="text-slate-800">{shop.pharmacistInCharge}</strong></span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex flex-wrap gap-1.5">
+                  {shop.services.map((svc) => (
+                    <span 
+                      key={svc} 
+                      className="px-2 py-0.5 rounded text-[11px] bg-slate-50 text-slate-600 border border-slate-200"
+                    >
+                      ✓ {svc}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Right Column: Enquiry Form (5 Cols) */}
+        <section aria-labelledby="enquiry-form-heading" className="lg:col-span-5 space-y-4">
+          <h3 id="enquiry-form-heading" className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading flex items-center gap-2">
+            <Mail className="w-4 h-4 text-emerald-600" />
+            <span>Send Medicine Enquiry</span>
+          </h3>
+
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            {submittedTicket && (
+              <div 
+                role="status" 
+                className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs space-y-1"
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Enquiry Sent Successfully!</span>
+                </div>
+                <p>
+                  Your Reference Ticket is <strong className="font-mono text-emerald-800">{submittedTicket}</strong>. Our registered pharmacist will review and respond shortly.
                 </p>
               </div>
-            </div>
+            )}
 
-            <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200/80 space-y-3">
-              <p className="text-xs text-slate-700 leading-relaxed">
-                Listen to the registered pharmacist advisory on taking prescribed medication after meals and reporting adverse reactions immediately.
-              </p>
-
-              {/* Live Interactive Voice Audio Button */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handlePlayVoiceAdvisory}
-                  className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-xs ${
-                    isPlayingVoice
-                      ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
-                >
-                  {isPlayingVoice ? (
-                    <>
-                      <Square className="w-3.5 h-3.5 fill-current" />
-                      <span>Stop Pharmacist Audio</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Play Pharmacist Voice Advisory (Audio)</span>
-                    </>
-                  )}
-                </button>
+            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+              <div>
+                <label htmlFor="enq-name" className="block font-semibold text-slate-700 mb-1">
+                  Your Full Name *
+                </label>
+                <input
+                  id="enq-name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Amit Kumar"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
               </div>
 
-              {/* Standard HTML5 Audio Tag */}
-              <audio controls className="w-full h-9 pt-1">
-                <source
-                  src="https://www.w3schools.com/html/horse.mp3"
-                  type="audio/mpeg"
+              <div>
+                <label htmlFor="enq-email" className="block font-semibold text-slate-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  id="enq-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-                Your browser does not support the audio element.
-              </audio>
-            </div>
+              </div>
 
-            {/* Chemical Formula Text Formatting */}
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5">
-              <div className="font-bold text-slate-800">Pharmaceutical Reference Standards:</div>
-              <ul className="text-slate-600 space-y-1 list-disc list-inside text-[11px]">
-                <li>
-                  Glucose Molecule: <strong>C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></strong> (Oral Rehydration Salts)
-                </li>
-                <li>
-                  Antiseptic Solution: <strong>H<sub>2</sub>O<sub>2</sub></strong> (Hydrogen Peroxide 3% v/v)
-                </li>
-                <li>
-                  Complies with <abbr title="World Health Organization" className="font-bold underline decoration-dotted">WHO</abbr> and <abbr title="Food and Drug Administration" className="font-bold underline decoration-dotted">FDA</abbr> standards.
-                </li>
-              </ul>
-            </div>
+              <div>
+                <label htmlFor="enq-phone" className="block font-semibold text-slate-700 mb-1">
+                  Mobile Number
+                </label>
+                <input
+                  id="enq-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 98765 43210"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="enq-subject" className="block font-semibold text-slate-700 mb-1">
+                  Enquiry Subject
+                </label>
+                <select
+                  id="enq-subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="Medicine Availability Check">Medicine Availability Check</option>
+                  <option value="Prescription Refill Request">Prescription Refill Request</option>
+                  <option value="Cold Chain & Insulin Storage">Cold Chain &amp; Insulin Storage</option>
+                  <option value="Home Delivery Request">Home Delivery Request</option>
+                  <option value="General Question">General Pharmacist Advice</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="enq-msg" className="block font-semibold text-slate-700 mb-1">
+                  Message / Medicine Name &amp; Quantity *
+                </label>
+                <textarea
+                  id="enq-msg"
+                  rows={3}
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Please specify which medicine you are looking for..."
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              >
+                <Send className="w-4 h-4" />
+                <span>Submit Enquiry</span>
+              </button>
+            </form>
+
+            {/* Recent Enquiries Log */}
+            {enquiries.length > 0 && (
+              <div className="pt-4 border-t border-slate-100 space-y-2">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Recent Enquiries ({enquiries.length})
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {enquiries.slice(0, 3).map((enq) => (
+                    <div 
+                      key={enq.id} 
+                      className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] space-y-1"
+                    >
+                      <div className="flex justify-between items-center font-bold text-slate-800">
+                        <span>{enq.customerName}</span>
+                        <span className="font-mono text-emerald-700">{enq.id}</span>
+                      </div>
+                      <p className="text-slate-600 line-clamp-1">{enq.message}</p>
+                      <div className="text-slate-400 text-[10px]">
+                        {enq.date} • {enq.time}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-
-          <div className="text-[11px] text-slate-500 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
-            <mark className="bg-transparent font-bold text-amber-900">Safety Notice:</mark> Never stop prescribed antibiotics prematurely without consulting your doctor.
-          </div>
-        </div>
-      </div>
-
-      {/* Structured Guidelines: Ordered, Unordered & Description Lists */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Ordered List */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100 font-bold text-sm text-slate-900 font-heading">
-            <ListOrdered className="w-4 h-4 text-emerald-600" />
-            <h3>Prescription Dispensing Protocol</h3>
-          </div>
-          <ol className="list-decimal list-inside space-y-2 text-xs text-slate-700 leading-relaxed">
-            <li>Verify Doctor's MCI registration number.</li>
-            <li>Inspect medicine brand and dosage strength.</li>
-            <li>Confirm batch number and expiry date.</li>
-            <li>Affix instructions &amp; dosage labels.</li>
-            <li>Issue official printed Tax Invoice.</li>
-          </ol>
-        </div>
-
-        {/* Unordered List */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100 font-bold text-sm text-slate-900 font-heading">
-            <List className="w-4 h-4 text-teal-600" />
-            <h3>Daily Safety Checklist</h3>
-          </div>
-          <ul className="list-disc list-inside space-y-2 text-xs text-slate-700 leading-relaxed">
-            <li>Cold-chain refrigerator logged at 2°C - 8°C.</li>
-            <li>Schedule H &amp; X safe locked and logged.</li>
-            <li>First-aid trauma kit restocked.</li>
-            <li>Fire extinguisher seal verified.</li>
-            <li>POS invoice printer paper reloaded.</li>
-          </ul>
-        </div>
-
-        {/* Description List */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100 font-bold text-sm text-slate-900 font-heading">
-            <BookMarked className="w-4 h-4 text-blue-600" />
-            <h3>Medical Terms Glossary</h3>
-          </div>
-          <dl className="space-y-2 text-xs">
-            <dt className="font-bold text-slate-900 font-mono">Generic Name:</dt>
-            <dd className="text-slate-600 pl-2 border-l-2 border-emerald-400">
-              The chemical active ingredient molecule name.
-            </dd>
-
-            <dt className="font-bold text-slate-900 font-mono mt-2">Contraindication:</dt>
-            <dd className="text-slate-600 pl-2 border-l-2 border-teal-400">
-              Specific condition where a drug must not be used.
-            </dd>
-          </dl>
-        </div>
+        </section>
       </div>
     </div>
   );
